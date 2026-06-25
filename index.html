@@ -241,6 +241,13 @@ textarea { resize: vertical; }
 .activity-feed li span { width: 26px; height: 26px; border-radius: 50%; background: var(--primary-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
 .activity-time { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
 
+/* ---------- Mobile topbar & drawers ---------- */
+.mobile-topbar { display: none; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; position: sticky; top: 0; z-index: 30; }
+.mobile-topbar .brand { padding: 0; }
+.mobile-topbar-btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(10, 30, 20, 0.45); z-index: 39; }
+.drawer-overlay.open { display: block; }
+
 /* responsive */
 @media (max-width: 1000px) {
   .app { grid-template-columns: var(--sidebar-w) 1fr; }
@@ -250,14 +257,35 @@ textarea { resize: vertical; }
 }
 @media (max-width: 700px) {
   .app { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+  .mobile-topbar { display: flex; }
+  .sidebar {
+    display: flex; position: fixed; left: 0; top: 0; z-index: 40;
+    transform: translateX(-100%); transition: transform .2s ease;
+    box-shadow: 0 0 24px rgba(0,0,0,0.18);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .legislation {
+    display: flex; position: fixed; right: 0; top: 0; z-index: 40; width: 85vw; max-width: var(--leg-w);
+    transform: translateX(100%); transition: transform .2s ease;
+    box-shadow: 0 0 24px rgba(0,0,0,0.18);
+  }
+  .legislation.open { transform: translateX(0); }
   .metrics-grid, .dashboard-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
+<div class="mobile-topbar">
+  <button class="mobile-topbar-btn" id="openSidebarBtn" aria-label="Открыть меню"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+  <div class="brand">
+    <div class="brand-mark">CA</div>
+    <div class="brand-text"><strong>ComplianceAI</strong></div>
+  </div>
+  <button class="mobile-topbar-btn" id="openLegislationBtn" aria-label="Открыть нормативную базу"><i class="ti ti-books" aria-hidden="true"></i></button>
+</div>
+<div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="app">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebarPanel">
     <div class="brand">
       <div class="brand-mark">CA</div>
       <div class="brand-text">
@@ -582,7 +610,7 @@ textarea { resize: vertical; }
   </main>
 
   <!-- ===================== LEGISLATION SIDEBAR ===================== -->
-  <aside class="legislation" id="legislationPanel">
+  <aside class="legislation" id="legislationPanel" data-mobile-drawer="legislation">
     <div class="legislation-header">
       <h3><i class="ti ti-books" aria-hidden="true"></i> Нормативная база</h3>
       <input type="text" id="legSearch" placeholder="Поиск по названию или ключевым словам...">
@@ -715,8 +743,29 @@ document.querySelectorAll(".nav-item").forEach((btn) => {
     document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById(`view-${btn.dataset.view}`).classList.add("active");
+    closeDrawers();
   });
 });
+
+/* ---------------- Mobile drawers ---------------- */
+const sidebarPanel = document.getElementById("sidebarPanel");
+const legislationPanel = document.getElementById("legislationPanel");
+const drawerOverlay = document.getElementById("drawerOverlay");
+
+function closeDrawers() {
+  sidebarPanel.classList.remove("open");
+  legislationPanel.classList.remove("open");
+  drawerOverlay.classList.remove("open");
+}
+document.getElementById("openSidebarBtn").addEventListener("click", () => {
+  sidebarPanel.classList.add("open");
+  drawerOverlay.classList.add("open");
+});
+document.getElementById("openLegislationBtn").addEventListener("click", () => {
+  legislationPanel.classList.add("open");
+  drawerOverlay.classList.add("open");
+});
+drawerOverlay.addEventListener("click", closeDrawers);
 
 /* ---------------- Theme toggle ---------------- */
 const themeToggle = document.getElementById("themeToggle");
