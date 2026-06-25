@@ -244,7 +244,9 @@ textarea { resize: vertical; }
 /* ---------- Mobile topbar & drawers ---------- */
 .mobile-topbar { display: none; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; position: sticky; top: 0; z-index: 30; }
 .mobile-topbar .brand { padding: 0; }
-.mobile-topbar-btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.mobile-topbar-btn { border: 1px solid var(--primary-light); background: var(--primary-light); color: var(--primary-dark); border-radius: 8px; width: 38px; height: 38px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s, transform .1s; }
+.mobile-topbar-btn:hover { background: var(--primary); color: #fff; }
+.mobile-topbar-btn:active { transform: scale(.94); }
 .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(10, 30, 20, 0.45); z-index: 39; }
 .drawer-overlay.open { display: block; }
 
