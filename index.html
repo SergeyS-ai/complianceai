@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComplianceAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/iconfont/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #f5f8f6;
+  --surface: #ffffff;
+  --border: #e4ece6;
+  --text: #14241a;
+  --text-muted: #6c7d72;
+  --primary: #00a651;
+  --primary-dark: #008a43;
+  --primary-light: #e6f7ed;
+  --accent: #00c264;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --radius: 14px;
+  --sidebar-w: 240px;
+  --leg-w: 320px;
+  --shadow: 0 2px 8px rgba(0, 80, 40, 0.06), 0 1px 2px rgba(0, 80, 40, 0.04);
+  --info-bg: #e7f1fc; --info-text: #1e64b4;
+  --amber-bg: #fdf2e3; --amber-text: #b3760f;
+  --red-bg: #fcebea; --red-text: #c23d3d;
+}
+
+[data-theme="dark"] {
+  --bg: #0a1410;
+  --surface: #102019;
+  --border: #1f3329;
+  --text: #e6f2ea;
+  --text-muted: #87a596;
+  --primary: #2bb583;
+  --primary-dark: #1f9d6e;
+  --primary-light: #15291f;
+  --accent: #34d399;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --info-bg: #15293a; --info-text: #5dafe0;
+  --amber-bg: #2e2310; --amber-text: #e0b35d;
+  --red-bg: #2e1414; --red-text: #e07a7a;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr var(--leg-w);
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 18px; }
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.3; }
+.brand-text strong { font-size: 14px; }
+.brand-text span { font-size: 11px; color: var(--text-muted); }
+
+.nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; border: none;
+  background: transparent; color: var(--text-muted);
+  font-size: 13.5px; text-align: left; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.nav-item:hover { background: var(--primary-light); color: var(--text); }
+.nav-item.active { background: linear-gradient(135deg, var(--accent), var(--primary-dark)); color: #fff; font-weight: 600; box-shadow: 0 3px 10px rgba(15, 107, 74, 0.25); }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+.sidebar-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+.user-chip { display: flex; align-items: center; gap: 8px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.user-name { font-size: 12.5px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--text-muted); }
+.theme-toggle { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 14px; color: var(--text); }
+
+/* ---------- Content ---------- */
+.content { padding: 24px 28px; overflow-x: hidden; }
+.view { display: none; }
+.view.active { display: block; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.view-header h1 { margin: 0 0 4px; font-size: 22px; }
+.subtitle { margin: 0; color: var(--text-muted); font-size: 13px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px; box-shadow: var(--shadow); }
+.card h2 { margin: 0 0 14px; font-size: 15px; }
+.card h3 { margin: 0 0 14px; font-size: 14px; }
+
+.check-type-switch { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
+.check-type-btn { border: none; background: transparent; padding: 7px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+.check-type-btn.active { background: linear-gradient(135deg, var(--accent), var(--primary-dark)); color: #fff; }
+
+/* ---------- Generator ---------- */
+.generator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.form-row { margin-bottom: 14px; }
+.form-row label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+.form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input, select, textarea {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+textarea { resize: vertical; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 20px; padding: 6px 11px; font-size: 12px; cursor: pointer; background: var(--bg); }
+.chip input { width: auto; }
+
+.dropzone { border: 1.5px dashed var(--border); border-radius: 8px; padding: 18px; text-align: center; color: var(--text-muted); font-size: 12.5px; cursor: pointer; background: var(--bg); }
+.dropzone.drag { border-color: var(--primary); background: var(--primary-light); }
+.file-list { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.file-list li { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; font-size: 12px; }
+.file-remove { border: none; background: transparent; color: var(--danger); cursor: pointer; font-size: 13px; }
+
+.btn { border: none; border-radius: 9px; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s, transform .1s; }
+.btn:hover { opacity: .9; }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--primary-dark)); color: #fff; box-shadow: 0 4px 12px rgba(15, 107, 74, 0.25); }
+.btn-secondary { background: var(--success); color: #fff; }
+.btn-ghost { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.btn-full { width: 100%; padding: 12px; font-size: 13.5px; }
+
+.generator-result.card { min-height: 460px; display: flex; flex-direction: column; }
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; gap: 10px; }
+.empty-icon { font-size: 36px; }
+.hidden { display: none !important; }
+
+.result-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.result-tab { border: none; background: transparent; padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.result-tab.active { color: var(--primary); border-color: var(--primary); }
+.result-panel { display: none; font-size: 13px; line-height: 1.6; white-space: pre-wrap; max-height: 320px; overflow-y: auto; }
+.result-panel.active { display: block; }
+.result-panel ol { padding-left: 18px; }
+
+.result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.result-rating { margin-top: 12px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-muted); }
+.rate-btn { border: 1px solid var(--border); background: var(--bg); border-radius: 7px; padding: 5px 9px; cursor: pointer; color: var(--text); }
+.rate-feedback { color: var(--success); font-weight: 600; }
+
+/* ---------- Legislation sidebar ---------- */
+.legislation { background: var(--surface); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; }
+.legislation-header { padding: 16px 16px 10px; border-bottom: 1px solid var(--border); }
+.legislation-header h3 { margin: 0 0 10px; font-size: 14px; }
+.legislation-header input { font-size: 12.5px; }
+.legislation-body { overflow-y: auto; padding: 10px 12px; flex: 1; }
+.leg-section { margin-bottom: 16px; }
+.leg-section-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 6px 6px 8px; letter-spacing: .03em; }
+.leg-doc { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+.leg-doc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 11px; cursor: pointer; background: var(--bg); }
+.leg-doc-head span.leg-name { font-size: 12.5px; font-weight: 600; }
+.leg-status { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.leg-status.Действует { background: var(--primary-light); color: var(--primary-dark); }
+.leg-status.Обновлено { background: var(--info-bg); color: var(--info-text); }
+.leg-status.Изменён { background: var(--amber-bg); color: var(--amber-text); }
+.leg-status.Live { background: var(--red-bg); color: var(--red-text); }
+.leg-doc-desc { padding: 0 11px; max-height: 0; overflow: hidden; transition: max-height .2s ease, padding .2s ease; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.leg-doc.open .leg-doc-desc { max-height: 220px; padding: 0 11px 11px; }
+
+/* ---------- History ---------- */
+.table-toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.table-toolbar input { flex: 1; min-width: 200px; }
+.table-toolbar select { width: auto; min-width: 160px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.data-table th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11.5px; text-transform: uppercase; }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.status-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.status-badge.Завершено { background: var(--primary-light); color: var(--primary-dark); }
+.status-badge.На.рассмотрении, .status-badge.На-рассмотрении { background: var(--info-bg); color: var(--info-text); }
+.status-badge.Срочно { background: var(--red-bg); color: var(--red-text); }
+.status-badge.Черновик { background: var(--bg); color: var(--text-muted); }
+
+/* ---------- Templates ---------- */
+.templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.template-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.template-card h4 { margin: 0; font-size: 14px; }
+.template-tag { align-self: flex-start; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--primary-light); color: var(--primary); }
+.template-uses { font-size: 12px; color: var(--text-muted); }
+.template-card .btn { margin-top: auto; }
+
+/* ---------- Dashboard ---------- */
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+.metric-card { display: flex; flex-direction: column; gap: 4px; }
+.metric-label { font-size: 12px; color: var(--text-muted); }
+.metric-value { font-size: 24px; font-weight: 700; }
+.metric-delta { font-size: 11.5px; color: var(--text-muted); }
+.metric-delta.up { color: var(--success); }
+
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.chart-card { min-height: 220px; }
+
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 10px; font-size: 12px; }
+.bar-track { background: var(--bg); border-radius: 6px; height: 10px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--primary); border-radius: 6px; }
+.bars.horizontal .bar-row { grid-template-columns: 90px 1fr 30px; }
+
+.sparkline { display: flex; align-items: flex-end; gap: 3px; height: 120px; }
+.spark-bar { flex: 1; background: var(--primary-light); border-radius: 3px 3px 0 0; position: relative; }
+.spark-bar.peak { background: var(--primary); }
+
+.risk-distribution { display: flex; flex-direction: column; gap: 10px; }
+.risk-row { display: grid; grid-template-columns: 90px 1fr 36px; align-items: center; gap: 10px; font-size: 12px; }
+.risk-track { background: var(--bg); border-radius: 6px; height: 10px; overflow: hidden; }
+.risk-fill { height: 100%; border-radius: 6px; }
+
+.usefulness-list { display: flex; flex-direction: column; gap: 10px; }
+.usefulness-row { display: grid; grid-template-columns: 220px 1fr 50px; align-items: center; gap: 10px; font-size: 12.5px; }
+.stars { color: var(--warning); font-size: 12px; }
+
+.activity-feed { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.activity-feed li { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.activity-feed li:last-child { border-bottom: none; padding-bottom: 0; }
+.activity-feed li span { width: 26px; height: 26px; border-radius: 50%; background: var(--primary-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.activity-time { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+/* responsive */
+@media (max-width: 1000px) {
+  .app { grid-template-columns: var(--sidebar-w) 1fr; }
+  .legislation { display: none; }
+  .generator-grid { grid-template-columns: 1fr; }
+  .metrics-grid, .dashboard-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .metrics-grid, .dashboard-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">CA</div>
+      <div class="brand-text">
+        <strong>ComplianceAI</strong>
+        <span>Комплаенс-платформа</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="generator">
+        <i class="ti ti-file-text nav-icon" aria-hidden="true"></i> Генератор заключений
+      </button>
+      <button class="nav-item" data-view="history">
+        <i class="ti ti-list-details nav-icon" aria-hidden="true"></i> История
+      </button>
+      <button class="nav-item" data-view="templates">
+        <i class="ti ti-layout-grid nav-icon" aria-hidden="true"></i> Шаблоны
+      </button>
+      <button class="nav-item" data-view="dashboard">
+        <i class="ti ti-chart-bar nav-icon" aria-hidden="true"></i> Дашборд
+      </button>
+      <button class="nav-item" data-view="recommendations">
+        <i class="ti ti-target nav-icon" aria-hidden="true"></i> Аналитика рекомендаций
+      </button>
+      <button class="nav-item" data-view="team">
+        <i class="ti ti-users nav-icon" aria-hidden="true"></i> Команда
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar">АС</div>
+        <div>
+          <div class="user-name">Айгерим С.</div>
+          <div class="user-role">Комплаенс-специалист</div>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Сменить тему"><i class="ti ti-moon" aria-hidden="true"></i></button>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <!-- ===================== GENERATOR ===================== -->
+    <section class="view active" id="view-generator">
+      <header class="view-header">
+        <div>
+          <h1>Генератор заключений</h1>
+          <p class="subtitle">Заполните вводные данные — заключение формируется за 2–5 минут</p>
+        </div>
+        <div class="check-type-switch" id="checkTypeSwitch">
+          <button class="check-type-btn active" data-check="aml">ОД/ФТ</button>
+          <button class="check-type-btn" data-check="fx">МЭС</button>
+          <button class="check-type-btn" data-check="combo">Комплексно</button>
+        </div>
+      </header>
+
+      <div class="generator-grid">
+        <div class="generator-form card">
+          <h2>Вводные данные</h2>
+          <form id="genForm">
+            <div class="form-row">
+              <label>Тип операции</label>
+              <select id="opType">
+                <option>Трансграничный перевод</option>
+                <option>Открытие счёта ЮЛ</option>
+                <option>Ценные бумаги</option>
+                <option>Торговое финансирование</option>
+                <option>Кредитная операция</option>
+                <option>Факторинг</option>
+              </select>
+            </div>
+            <div class="form-row two-col">
+              <div>
+                <label>Сумма (KZT)</label>
+                <input type="number" id="amount" placeholder="например, 25 000 000">
+              </div>
+              <div>
+                <label>Юрисдикция</label>
+                <input type="text" id="jurisdiction" placeholder="например, ОАЭ, РФ, Кипр">
+              </div>
+            </div>
+            <div class="form-row two-col">
+              <div>
+                <label>Категория клиента</label>
+                <select id="clientCategory">
+                  <option>ЮЛ-резидент</option>
+                  <option>ЮЛ-нерезидент</option>
+                  <option>ФЛ-резидент</option>
+                  <option>ПЭП</option>
+                </select>
+              </div>
+              <div>
+                <label>Уровень риска</label>
+                <select id="riskLevel">
+                  <option>Низкий</option>
+                  <option selected>Средний</option>
+                  <option>Высокий</option>
+                  <option>Критический</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Применимые регуляторные нормы</label>
+              <div class="chips" id="normsChips">
+                <label class="chip"><input type="checkbox" value="ФАТФ" checked> ФАТФ</label>
+                <label class="chip"><input type="checkbox" value="ЗПДФТ РК" checked> ЗПДФТ РК</label>
+                <label class="chip"><input type="checkbox" value="НБ РК"> НБ РК</label>
+                <label class="chip"><input type="checkbox" value="OFAC"> OFAC</label>
+                <label class="chip"><input type="checkbox" value="AML EU"> AML EU</label>
+                <label class="chip"><input type="checkbox" value="SWIFT"> SWIFT</label>
+                <label class="chip"><input type="checkbox" value="Basel IV"> Basel IV</label>
+                <label class="chip"><input type="checkbox" value="ВНДБ"> ВНДБ</label>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Описание операции и контекст</label>
+              <textarea id="description" rows="4" placeholder="Опишите детали операции, контрагентов, цель платежа..."></textarea>
+            </div>
+            <div class="form-row">
+              <label>Документы (PDF, DOC, DOCX — до 20 МБ)</label>
+              <div class="dropzone" id="dropzone">
+                <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx" hidden>
+                <span><i class="ti ti-paperclip" aria-hidden="true"></i> Нажмите или перетащите файлы сюда</span>
+              </div>
+              <ul class="file-list" id="fileList"></ul>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="generateBtn">
+              <i class="ti ti-bolt" aria-hidden="true"></i> Сформировать заключение
+            </button>
+          </form>
+        </div>
+
+        <div class="generator-result card" id="resultCard">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+            <p>Заполните форму и нажмите «Сформировать заключение», чтобы увидеть результат</p>
+          </div>
+          <div class="result-body hidden" id="resultBody">
+            <div class="result-tabs">
+              <button class="result-tab active" data-tab="conclusion">Заключение</button>
+              <button class="result-tab" data-tab="recommendations">Рекомендации</button>
+              <button class="result-tab" data-tab="regulator">Для регулятора</button>
+            </div>
+            <div class="result-panel active" id="panel-conclusion"></div>
+            <div class="result-panel" id="panel-recommendations"></div>
+            <div class="result-panel" id="panel-regulator"></div>
+
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="exportPdf"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Экспорт в PDF</button>
+              <button class="btn btn-ghost" id="exportWord"><i class="ti ti-file-type-doc" aria-hidden="true"></i> Экспорт в Word</button>
+              <button class="btn btn-ghost" id="copyClip"><i class="ti ti-copy" aria-hidden="true"></i> Копировать</button>
+              <button class="btn btn-secondary" id="sendRegulator"><i class="ti ti-send" aria-hidden="true"></i> Отправить регулятору</button>
+            </div>
+            <div class="result-rating">
+              <span>Оцените качество заключения:</span>
+              <button class="rate-btn" id="thumbUp"><i class="ti ti-thumb-up" aria-hidden="true"></i></button>
+              <button class="rate-btn" id="thumbDown"><i class="ti ti-thumb-down" aria-hidden="true"></i></button>
+              <span class="rate-feedback" id="rateFeedback"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HISTORY ===================== -->
+    <section class="view" id="view-history">
+      <header class="view-header">
+        <div>
+          <h1>История заключений</h1>
+          <p class="subtitle">Все сформированные заключения по команде</p>
+        </div>
+      </header>
+      <div class="card">
+        <div class="table-toolbar">
+          <input type="text" id="historySearch" placeholder="Поиск по номеру, типу, специалисту...">
+          <select id="historyTypeFilter">
+            <option value="">Все типы проверки</option>
+            <option value="ОД/ФТ">ОД/ФТ</option>
+            <option value="МЭС">МЭС</option>
+            <option value="Комплексно">Комплексно</option>
+          </select>
+          <select id="historyStatusFilter">
+            <option value="">Все статусы</option>
+            <option value="Завершено">Завершено</option>
+            <option value="На рассмотрении">На рассмотрении</option>
+            <option value="Срочно">Срочно</option>
+            <option value="Черновик">Черновик</option>
+          </select>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>№</th><th>Тип операции</th><th>Тип проверки</th><th>Специалист</th><th>Статус</th><th>Дата</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== TEMPLATES ===================== -->
+    <section class="view" id="view-templates">
+      <header class="view-header">
+        <div>
+          <h1>Шаблоны</h1>
+          <p class="subtitle">Готовые пресеты для типовых операций</p>
+        </div>
+      </header>
+      <div class="templates-grid" id="templatesGrid"></div>
+    </section>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard">
+      <header class="view-header">
+        <div>
+          <h1>Управленческий дашборд</h1>
+          <p class="subtitle">Нагрузка, качество и польза инструмента по команде</p>
+        </div>
+      </header>
+
+      <div class="metrics-grid">
+        <div class="metric-card card">
+          <span class="metric-label">Заключений за месяц</span>
+          <span class="metric-value">248</span>
+          <span class="metric-delta up">+18% к прошлому месяцу</span>
+        </div>
+        <div class="metric-card card">
+          <span class="metric-label">Среднее время генерации</span>
+          <span class="metric-value">3.4 мин</span>
+          <span class="metric-delta up">в 47 раз быстрее ручной работы</span>
+        </div>
+        <div class="metric-card card">
+          <span class="metric-label">Рейтинг качества AI</span>
+          <span class="metric-value">4.3 / 5.0</span>
+          <span class="metric-delta up">+0.2 за квартал</span>
+        </div>
+        <div class="metric-card card">
+          <span class="metric-label">Загружено документов</span>
+          <span class="metric-value">612</span>
+          <span class="metric-delta">PDF + Word за период</span>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card chart-card">
+          <h3>Распределение по типам проверки</h3>
+          <div class="bars" id="typeBars"></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Нагрузка по специалистам</h3>
+          <div class="bars horizontal" id="loadBars"></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Активность по дням (текущий месяц)</h3>
+          <div class="sparkline" id="sparkline"></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Распределение по уровням риска</h3>
+          <div class="risk-distribution" id="riskDist"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Полезность функционала</h3>
+        <div class="usefulness-list" id="usefulnessList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Лента активности</h3>
+        <ul class="activity-feed" id="activityFeed"></ul>
+      </div>
+    </section>
+
+    <!-- ===================== RECOMMENDATIONS ANALYTICS ===================== -->
+    <section class="view" id="view-recommendations">
+      <header class="view-header">
+        <div>
+          <h1>Аналитика рекомендаций</h1>
+          <p class="subtitle">Качество AI-движка генерации заключений</p>
+        </div>
+      </header>
+      <div class="metrics-grid">
+        <div class="metric-card card">
+          <span class="metric-label">Точность рекомендаций</span>
+          <span class="metric-value">87%</span>
+          <span class="metric-delta">совпадение с решением специалиста</span>
+        </div>
+        <div class="metric-card card">
+          <span class="metric-label">Принято без изменений</span>
+          <span class="metric-value">68%</span>
+          <span class="metric-delta up">цель ≥ 65%</span>
+        </div>
+        <div class="metric-card card">
+          <span class="metric-label">Экономия времени</span>
+          <span class="metric-value">312 ч/мес</span>
+          <span class="metric-delta up">цель ≥ 300 ч/мес</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Причины редактирования заключений</h3>
+        <div class="bars" id="editReasonsBars"></div>
+      </div>
+    </section>
+
+    <!-- ===================== TEAM ===================== -->
+    <section class="view" id="view-team">
+      <header class="view-header">
+        <div>
+          <h1>Управление командой</h1>
+          <p class="subtitle">Производительность специалистов</p>
+        </div>
+      </header>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr><th>Специалист</th><th>Заключений</th><th>Средняя оценка AI</th><th>Принято без правок</th><th>Активность</th></tr>
+          </thead>
+          <tbody id="teamTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== LEGISLATION SIDEBAR ===================== -->
+  <aside class="legislation" id="legislationPanel">
+    <div class="legislation-header">
+      <h3><i class="ti ti-books" aria-hidden="true"></i> Нормативная база</h3>
+      <input type="text" id="legSearch" placeholder="Поиск по названию или ключевым словам...">
+    </div>
+    <div class="legislation-body" id="legislationBody"></div>
+  </aside>
+</div>
+
+<script>
+// Мок-данные платформы ComplianceAI
+
+const LEGISLATION = {
+  aml: {
+    title: "ОД/ФТ",
+    docs: [
+      { name: "Закон РК «О ПОД/ФТ» № 191-V", status: "Действует", desc: "Базовый закон, регулирующий противодействие отмыванию доходов и финансированию терроризма. Определяет обязанности субъектов финансового мониторинга, пороги операций, подлежащих обязательному контролю." },
+      { name: "Правила НБ РК по ПОД/ФТ (Постановление № 199)", status: "Обновлено", desc: "Детализирует процедуры внутреннего контроля, идентификации клиентов (KYC) и порядок передачи сведений в КФМ РК." },
+      { name: "ВНДБ РК — адаптация Рекомендаций ФАТФ", status: "Действует", desc: "40 Рекомендаций ФАТФ, адаптированные под казахстанское законодательство. Основа риск-ориентированного подхода." },
+      { name: "Типологии ОД — методическое руководство КФМ РК", status: "Изменён", desc: "Описывает актуальные схемы и индикаторы подозрительных операций, используемые для скоринга риска." }
+    ]
+  },
+  fx: {
+    title: "Валютное регулирование (МЭС)",
+    docs: [
+      { name: "Закон РК «О валютном регулировании» № 57", status: "Действует", desc: "Регулирует порядок проведения валютных операций, требования к репатриации валютной выручки и регистрации экспортно-импортных контрактов." },
+      { name: "Правила НБ РК по валютным операциям (Постановление № 68)", status: "Действует", desc: "Устанавливает пороги уведомления и регистрации валютных договоров, требования к подтверждающим документам." },
+      { name: "МЭС-отчётность — форматы ЕБНК", status: "Обновлено", desc: "Единая база накопления кредитной информации. Форматы и сроки представления отчётности по валютным операциям." }
+    ]
+  },
+  combo: {
+    title: "Комплексный комплаенс",
+    docs: [
+      { name: "Стандарт ISO 37301", status: "Действует", desc: "Международный стандарт систем менеджмента комплаенс. Используется как методологическая база внутреннего контроля." },
+      { name: "Требования НБ РК к внутреннему контролю (Постановление № 51)", status: "Действует", desc: "Регламентирует организацию системы внутреннего контроля в финансовых организациях, включая комплаенс-функцию." },
+      { name: "Санкционные списки OFAC / UN / EU", status: "Live", desc: "Автоматически обновляемые санкционные перечни. Используются для проверки бенефициаров и контрагентов в реальном времени." }
+    ]
+  },
+  internal: {
+    title: "ВНДБ — внутренние документы",
+    docs: [
+      { name: "Политика по управлению рисками ОД/ФТ", status: "Действует", desc: "Внутренний документ банка, определяющий риск-аппетит, категории риска клиентов и эскалационные процедуры." },
+      { name: "Процедура KYC/KYB", status: "Обновлено", desc: "Порядок идентификации и проверки клиентов — физических и юридических лиц, включая due diligence бенефициарных собственников." }
+    ]
+  }
+};
+
+const TEMPLATES = [
+  { name: "Трансграничный перевод", checkType: "ОД/ФТ", uses: 312, fields: { opType: "Трансграничный перевод", riskLevel: "Высокий" } },
+  { name: "Открытие счёта ЮЛ", checkType: "МЭС", uses: 187, fields: { opType: "Открытие счёта ЮЛ", riskLevel: "Средний" } },
+  { name: "ПЭП-верификация", checkType: "Комплексно", uses: 94, fields: { opType: "Кредитная операция", riskLevel: "Критический" } },
+  { name: "Ценные бумаги", checkType: "МЭС", uses: 56, fields: { opType: "Ценные бумаги", riskLevel: "Средний" } }
+];
+
+const SPECIALISTS = ["Айгерим С.", "Нурлан Б.", "Динара К.", "Ержан М.", "Сауле Т."];
+const STATUSES = ["Завершено", "На рассмотрении", "Срочно", "Черновик"];
+const OP_TYPES = ["Трансграничный перевод", "Открытие счёта ЮЛ", "Ценные бумаги", "Торговое финансирование", "Кредитная операция", "Факторинг"];
+const CHECK_TYPES = ["ОД/ФТ", "МЭС", "Комплексно"];
+
+function generateHistoryData(count) {
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(2026, 5, 25 - i % 25, 9 + (i % 8));
+    rows.push({
+      id: `CA-${(1000 + i)}`,
+      opType: OP_TYPES[i % OP_TYPES.length],
+      checkType: CHECK_TYPES[i % CHECK_TYPES.length],
+      specialist: SPECIALISTS[i % SPECIALISTS.length],
+      status: STATUSES[i % STATUSES.length],
+      date: d.toISOString().slice(0, 10)
+    });
+  }
+  return rows;
+}
+
+const HISTORY = generateHistoryData(42);
+
+const TEAM = SPECIALISTS.map((name, i) => ({
+  name,
+  role: i === 0 ? "Старший специалист" : "Специалист",
+  count: 30 + i * 7 + (i % 2) * 5,
+  aiRating: (4.0 + (i % 3) * 0.2).toFixed(1),
+  acceptedNoEdit: 55 + i * 4,
+  activity: ["Высокая", "Высокая", "Средняя", "Высокая", "Низкая"][i]
+}));
+
+const USEFULNESS = [
+  { name: "Генератор заключений", score: 4.6 },
+  { name: "Загрузка документов (PDF/Word)", score: 4.1 },
+  { name: "Рекомендации", score: 4.4 },
+  { name: "Текст для регулятора", score: 4.2 },
+  { name: "Панель законодательства", score: 4.7 },
+  { name: "Шаблоны", score: 3.9 }
+];
+
+const ACTIVITY_FEED = [
+  { icon: "ti-file-text", text: "Айгерим С. создала заключение CA-1041 (ОД/ФТ)", time: "2 мин назад" },
+  { icon: "ti-arrow-up", text: "Заключение CA-1038 эскалировано на руководителя (Критический риск)", time: "15 мин назад" },
+  { icon: "ti-send", text: "Нурлан Б. отправил СПО в КФМ РК по операции CA-1035", time: "37 мин назад" },
+  { icon: "ti-ban", text: "Система автоматически блокировала операцию с контрагентом из санкционного списка OFAC", time: "1 ч назад" },
+  { icon: "ti-file-text", text: "Динара К. создала заключение CA-1031 (МЭС)", time: "2 ч назад" },
+  { icon: "ti-send", text: "Ержан М. отправил уведомление в НБ РК по CA-1027", time: "3 ч назад" }
+];
+
+const EDIT_REASONS = [
+  { label: "Уточнение формулировок", value: 38 },
+  { label: "Добавление деталей", value: 27 },
+  { label: "Изменение уровня риска", value: 19 },
+  { label: "Корректировка рекомендаций", value: 11 },
+  { label: "Прочее", value: 5 }
+];
+
+const RISK_DISTRIBUTION = [
+  { label: "Низкий", value: 34, color: "#22c55e" },
+  { label: "Средний", value: 41, color: "#eab308" },
+  { label: "Высокий", value: 18, color: "#f97316" },
+  { label: "Критический", value: 7, color: "#ef4444" }
+];
+
+const SPARKLINE_DATA = [12, 18, 9, 22, 30, 25, 14, 19, 27, 33, 21, 17, 24, 29, 35, 31, 20, 16, 23, 28, 26, 19, 22, 30, 25];
+
+// ComplianceAI — клиентская логика (мок-данные, без сборки)
+
+let currentCheckType = "aml";
+let uploadedFiles = [];
+
+/* ---------------- Navigation ---------------- */
+document.querySelectorAll(".nav-item").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`view-${btn.dataset.view}`).classList.add("active");
+  });
+});
+
+/* ---------------- Theme toggle ---------------- */
+const themeToggle = document.getElementById("themeToggle");
+themeToggle.addEventListener("click", () => {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+  themeToggle.innerHTML = isDark ? '<i class="ti ti-moon" aria-hidden="true"></i>' : '<i class="ti ti-sun" aria-hidden="true"></i>';
+});
+
+/* ---------------- Check type switch ---------------- */
+document.querySelectorAll(".check-type-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".check-type-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentCheckType = btn.dataset.check;
+    renderLegislation();
+  });
+});
+
+/* ---------------- File upload ---------------- */
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+const fileListEl = document.getElementById("fileList");
+
+dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("drag"); });
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropzone.classList.remove("drag");
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener("change", () => addFiles(fileInput.files));
+
+function addFiles(fileListObj) {
+  Array.from(fileListObj).forEach((f) => {
+    if (f.size > 20 * 1024 * 1024) {
+      alert(`Файл "${f.name}" превышает лимит 20 МБ`);
+      return;
+    }
+    uploadedFiles.push(f);
+  });
+  renderFileList();
+}
+
+function renderFileList() {
+  fileListEl.innerHTML = "";
+  uploadedFiles.forEach((f, idx) => {
+    const li = document.createElement("li");
+    const sizeKb = (f.size / 1024).toFixed(0);
+    li.innerHTML = `<span><i class="ti ti-file" aria-hidden="true"></i> ${f.name} · ${sizeKb} КБ</span><button class="file-remove" data-idx="${idx}"><i class="ti ti-x" aria-hidden="true"></i></button>`;
+    fileListEl.appendChild(li);
+  });
+  fileListEl.querySelectorAll(".file-remove").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      uploadedFiles.splice(Number(btn.dataset.idx), 1);
+      renderFileList();
+    });
+  });
+}
+
+/* ---------------- Generator ---------------- */
+const genForm = document.getElementById("genForm");
+const emptyState = document.getElementById("emptyState");
+const resultBody = document.getElementById("resultBody");
+const generateBtn = document.getElementById("generateBtn");
+
+genForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  generateBtn.disabled = true;
+  generateBtn.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i> Формируется заключение...';
+
+  const delay = uploadedFiles.length > 0 ? 1800 : 700;
+  setTimeout(() => {
+    const data = collectFormData();
+    renderResult(data);
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<i class="ti ti-bolt" aria-hidden="true"></i> Сформировать заключение';
+  }, delay);
+});
+
+function collectFormData() {
+  const norms = Array.from(document.querySelectorAll("#normsChips input:checked")).map((c) => c.value);
+  return {
+    checkType: currentCheckType,
+    opType: document.getElementById("opType").value,
+    amount: document.getElementById("amount").value || "не указана",
+    jurisdiction: document.getElementById("jurisdiction").value || "не указана",
+    clientCategory: document.getElementById("clientCategory").value,
+    riskLevel: document.getElementById("riskLevel").value,
+    norms: norms.length ? norms.join(", ") : "не выбраны",
+    description: document.getElementById("description").value || "не предоставлено",
+    files: uploadedFiles.map((f) => f.name)
+  };
+}
+
+const CHECK_TYPE_LABEL = { aml: "ОД/ФТ", fx: "МЭС (валютный контроль)", combo: "Комплексно" };
+
+function renderResult(d) {
+  emptyState.classList.add("hidden");
+  resultBody.classList.remove("hidden");
+
+  const checkLabel = CHECK_TYPE_LABEL[d.checkType];
+  const filesNote = d.files.length
+    ? `\n\nПроанализированы приложенные документы (${d.files.length}): ${d.files.join(", ")}.`
+    : "";
+
+  document.getElementById("panel-conclusion").innerText =
+`ЗАКЛЮЧЕНИЕ ПО РЕЗУЛЬТАТАМ ПРОВЕРКИ (${checkLabel})
+
+Тип операции: ${d.opType}
+Сумма: ${d.amount} KZT
+Юрисдикция: ${d.jurisdiction}
+Категория клиента: ${d.clientCategory}
+Уровень риска: ${d.riskLevel}
+Применённые нормы: ${d.norms}
+
+По результатам анализа вводных данных${d.files.length ? " и приложенных документов" : ""} установлено, что операция «${d.opType}» с участием клиента категории «${d.clientCategory}» классифицирована по уровню риска «${d.riskLevel}». Контекст операции: ${d.description}
+
+С учётом требований ${d.norms} рекомендуется применить процедуры усиленной проверки, соответствующие установленному уровню риска. Признаков прямого нарушения нормативных требований на основании представленных данных не выявлено, при этом операция требует контроля в соответствии с риск-ориентированным подходом.${filesNote}
+
+Итоговый статус операции: ${d.riskLevel === "Критический" ? "ТРЕБУЕТ ЭСКАЛАЦИИ НА РУКОВОДИТЕЛЯ" : d.riskLevel === "Высокий" ? "ТРЕБУЕТ УСИЛЕННОЙ ПРОВЕРКИ" : "ДОПУСТИМО К ИСПОЛНЕНИЮ С КОНТРОЛЕМ"}`;
+
+  const recs = buildRecommendations(d);
+  const ol = document.createElement("ol");
+  recs.forEach((r) => {
+    const li = document.createElement("li");
+    li.textContent = r;
+    ol.appendChild(li);
+  });
+  document.getElementById("panel-recommendations").innerHTML = "";
+  document.getElementById("panel-recommendations").appendChild(ol);
+
+  document.getElementById("panel-regulator").innerText = buildRegulatorText(d, checkLabel);
+
+  switchResultTab("conclusion");
+  document.getElementById("rateFeedback").textContent = "";
+}
+
+function buildRecommendations(d) {
+  const list = [
+    `Зафиксировать заключение по операции «${d.opType}» в журнале мониторинга.`,
+    `Провести углублённую проверку контрагента в юрисдикции «${d.jurisdiction}» на предмет санкционных ограничений (OFAC/UN/EU).`
+  ];
+  if (d.riskLevel === "Высокий" || d.riskLevel === "Критический") {
+    list.push("Запросить дополнительные подтверждающие документы по источнику средств.");
+    list.push("Эскалировать решение на старшего специалиста / руководителя направления.");
+  }
+  if (d.checkType === "fx" || d.checkType === "combo") {
+    list.push("Проверить корректность оформления валютного договора и сроков репатриации согласно Постановлению № 68.");
+  }
+  if (d.checkType === "aml" || d.checkType === "combo") {
+    list.push("Сверить бенефициаров операции с типологиями ОД КФМ РК.");
+  }
+  list.push("Установить периодичность повторного мониторинга клиента в соответствии с категорией риска.");
+  return list;
+}
+
+function buildRegulatorText(d, checkLabel) {
+  const target = d.checkType === "fx" ? "НБ РК (МЭС-отчётность)" : "КФМ РК (СПО)";
+  return `УВЕДОМЛЕНИЕ ДЛЯ РЕГУЛЯТОРА — ${target}
+
+Тип проверки: ${checkLabel}
+Операция: ${d.opType}
+Сумма: ${d.amount} KZT
+Юрисдикция: ${d.jurisdiction}
+Категория клиента: ${d.clientCategory}
+Уровень риска: ${d.riskLevel}
+
+Настоящим сообщается о выявленной операции, классифицированной по уровню риска «${d.riskLevel}» в соответствии с ${d.norms}. Операция передана на рассмотрение в рамках процедур внутреннего контроля субъекта финансового мониторинга.
+
+Ответственный специалист: Айгерим С.
+Дата формирования: ${new Date().toLocaleDateString("ru-RU")}`;
+}
+
+document.querySelectorAll(".result-tab").forEach((tab) => {
+  tab.addEventListener("click", () => switchResultTab(tab.dataset.tab));
+});
+function switchResultTab(name) {
+  document.querySelectorAll(".result-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".result-panel").forEach((p) => p.classList.toggle("active", p.id === `panel-${name}`));
+}
+
+document.getElementById("exportPdf").addEventListener("click", () => fakeExport("PDF"));
+document.getElementById("exportWord").addEventListener("click", () => fakeExport("Word"));
+document.getElementById("sendRegulator").addEventListener("click", () => {
+  alert("Уведомление отправлено в канал регулятора (демо-режим, интеграция P1 — см. PRD §10).");
+});
+document.getElementById("copyClip").addEventListener("click", () => {
+  const active = document.querySelector(".result-panel.active");
+  navigator.clipboard?.writeText(active.innerText).then(() => alert("Текст скопирован в буфер обмена"));
+});
+function fakeExport(format) {
+  alert(`Экспорт в ${format} запущен (демо-режим). В реальной системе файл будет сформирован и скачан.`);
+}
+
+document.getElementById("thumbUp").addEventListener("click", () => rate(true));
+document.getElementById("thumbDown").addEventListener("click", () => rate(false));
+function rate(positive) {
+  document.getElementById("rateFeedback").textContent = positive ? "Спасибо за оценку!" : "Спасибо, учтём для улучшения качества.";
+}
+
+/* ---------------- Legislation sidebar ---------------- */
+function renderLegislation(filter = "") {
+  const body = document.getElementById("legislationBody");
+  body.innerHTML = "";
+
+  const sectionsToShow = currentCheckType === "combo"
+    ? ["aml", "fx", "combo", "internal"]
+    : currentCheckType === "aml"
+      ? ["aml", "internal"]
+      : ["fx", "internal"];
+
+  const q = filter.trim().toLowerCase();
+
+  sectionsToShow.forEach((key) => {
+    const section = LEGISLATION[key];
+    const docs = section.docs.filter((d) =>
+      !q || d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q)
+    );
+    if (!docs.length) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "leg-section";
+    const title = document.createElement("div");
+    title.className = "leg-section-title";
+    title.textContent = section.title;
+    wrap.appendChild(title);
+
+    docs.forEach((doc) => {
+      const el = document.createElement("div");
+      el.className = "leg-doc";
+      el.innerHTML = `
+        <div class="leg-doc-head">
+          <span class="leg-name">${doc.name}</span>
+          <span class="leg-status ${doc.status}">${doc.status}</span>
+        </div>
+        <div class="leg-doc-desc">${doc.desc}</div>`;
+      el.querySelector(".leg-doc-head").addEventListener("click", () => el.classList.toggle("open"));
+      wrap.appendChild(el);
+    });
+    body.appendChild(wrap);
+  });
+
+  if (!body.children.length) {
+    body.innerHTML = `<p style="color:var(--text-muted);font-size:12.5px;padding:10px;">Ничего не найдено</p>`;
+  }
+}
+document.getElementById("legSearch").addEventListener("input", (e) => renderLegislation(e.target.value));
+
+/* ---------------- History ---------------- */
+function renderHistory() {
+  const search = document.getElementById("historySearch").value.trim().toLowerCase();
+  const typeFilter = document.getElementById("historyTypeFilter").value;
+  const statusFilter = document.getElementById("historyStatusFilter").value;
+
+  const rows = HISTORY.filter((r) => {
+    if (typeFilter && r.checkType !== typeFilter) return false;
+    if (statusFilter && r.status !== statusFilter) return false;
+    if (search) {
+      const hay = `${r.id} ${r.opType} ${r.specialist}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById("historyTableBody");
+  tbody.innerHTML = rows.map((r) => `
+    <tr>
+      <td>${r.id}</td>
+      <td>${r.opType}</td>
+      <td>${r.checkType}</td>
+      <td>${r.specialist}</td>
+      <td><span class="status-badge ${r.status.replace(/\s/g, "-")}">${r.status}</span></td>
+      <td>${r.date}</td>
+    </tr>`).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Нет записей</td></tr>`;
+}
+["historySearch", "historyTypeFilter", "historyStatusFilter"].forEach((id) =>
+  document.getElementById(id).addEventListener("input", renderHistory)
+);
+
+/* ---------------- Templates ---------------- */
+function renderTemplates() {
+  const grid = document.getElementById("templatesGrid");
+  grid.innerHTML = TEMPLATES.map((t) => `
+    <div class="template-card">
+      <span class="template-tag">${t.checkType}</span>
+      <h4>${t.name}</h4>
+      <span class="template-uses">Использован ${t.uses} раз</span>
+      <button class="btn btn-primary use-template" data-name="${t.name}">Применить шаблон</button>
+    </div>`).join("");
+
+  grid.querySelectorAll(".use-template").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tpl = TEMPLATES.find((t) => t.name === btn.dataset.name);
+      document.querySelector('[data-view="generator"]').click();
+      document.getElementById("opType").value = tpl.fields.opType;
+      document.getElementById("riskLevel").value = tpl.fields.riskLevel;
+      const map = { "ОД/ФТ": "aml", "МЭС": "fx", "Комплексно": "combo" };
+      const checkBtn = document.querySelector(`.check-type-btn[data-check="${map[tpl.checkType]}"]`);
+      checkBtn.click();
+    });
+  });
+}
+
+/* ---------------- Dashboard ---------------- */
+function renderDashboard() {
+  const typeCount = { "ОД/ФТ": 0, "МЭС": 0, "Комплексно": 0 };
+  HISTORY.forEach((r) => typeCount[r.checkType]++);
+  const maxType = Math.max(...Object.values(typeCount));
+  document.getElementById("typeBars").innerHTML = Object.entries(typeCount).map(([label, value]) => barRow(label, value, maxType)).join("");
+
+  const loadCount = {};
+  HISTORY.forEach((r) => loadCount[r.specialist] = (loadCount[r.specialist] || 0) + 1);
+  const maxLoad = Math.max(...Object.values(loadCount));
+  document.getElementById("loadBars").innerHTML = Object.entries(loadCount).map(([label, value]) => barRow(label, value, maxLoad)).join("");
+
+  const maxSpark = Math.max(...SPARKLINE_DATA);
+  document.getElementById("sparkline").innerHTML = SPARKLINE_DATA.map((v) =>
+    `<div class="spark-bar ${v === maxSpark ? "peak" : ""}" style="height:${(v / maxSpark) * 100}%" title="${v}"></div>`
+  ).join("");
+
+  document.getElementById("riskDist").innerHTML = RISK_DISTRIBUTION.map((r) => `
+    <div class="risk-row">
+      <span>${r.label}</span>
+      <div class="risk-track"><div class="risk-fill" style="width:${r.value}%;background:${r.color}"></div></div>
+      <span>${r.value}%</span>
+    </div>`).join("");
+
+  document.getElementById("usefulnessList").innerHTML = USEFULNESS.map((u) => `
+    <div class="usefulness-row">
+      <span>${u.name}</span>
+      <div class="risk-track"><div class="risk-fill" style="width:${(u.score / 5) * 100}%;background:var(--primary)"></div></div>
+      <span class="stars">${u.score.toFixed(1)} ★</span>
+    </div>`).join("");
+
+  document.getElementById("activityFeed").innerHTML = ACTIVITY_FEED.map((a) => `
+    <li><span><i class="ti ${a.icon}" aria-hidden="true"></i></span><div>${a.text}<span class="activity-time">${a.time}</span></div></li>`).join("");
+
+  const maxEdit = Math.max(...EDIT_REASONS.map((e) => e.value));
+  document.getElementById("editReasonsBars").innerHTML = EDIT_REASONS.map((e) => barRow(e.label, e.value, maxEdit, "%")).join("");
+}
+
+function barRow(label, value, max, suffix = "") {
+  const pct = max ? (value / max) * 100 : 0;
+  return `<div class="bar-row">
+    <span>${label}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+    <span>${value}${suffix}</span>
+  </div>`;
+}
+
+/* ---------------- Team ---------------- */
+function renderTeam() {
+  document.getElementById("teamTableBody").innerHTML = TEAM.map((m) => `
+    <tr>
+      <td>${m.name} <span style="color:var(--text-muted);font-size:11px;">· ${m.role}</span></td>
+      <td>${m.count}</td>
+      <td>${m.aiRating} ★</td>
+      <td>${m.acceptedNoEdit}%</td>
+      <td><span class="status-badge ${m.activity === "Высокая" ? "Завершено" : m.activity === "Средняя" ? "На-рассмотрении" : "Черновик"}">${m.activity}</span></td>
+    </tr>`).join("");
+}
+
+/* ---------------- Init ---------------- */
+renderLegislation();
+renderHistory();
+renderTemplates();
+renderDashboard();
+renderTeam();
+</script>
+</body>
+</html>
